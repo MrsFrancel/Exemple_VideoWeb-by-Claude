@@ -17,6 +17,23 @@
       pointer-events: none; transition: opacity 1.5s;
       white-space: nowrap;
     }
+    #gh-btn {
+      position: fixed; top: 16px; left: 16px;
+      color: rgba(255,210,130,0.85);
+      font: 600 12px/1 system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,210,130,0.35);
+      border-radius: 6px;
+      padding: 7px 13px;
+      transition: background 0.2s, color 0.2s;
+      z-index: 100;
+    }
+    #gh-btn:hover {
+      background: rgba(255,210,130,0.15);
+      color: rgba(255,220,150,1);
+    }
     #err {
       display: none; position: fixed; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
@@ -28,10 +45,10 @@
   </style>
 </head>
 <body>
+  <a id="gh-btn" href="https://github.com/MrsFrancel/Exemple_VideoWeb-by-Claude" target="_blank">by M.Francel</a>
   <div id="hint">Déplacez la souris &nbsp;·&nbsp; Cliquez (maintenu) pour activer la trainée</div>
   <div id="err"></div>
 
-  <!-- Three.js r128 — version éprouvée, scripts globaux garantis -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
@@ -43,11 +60,9 @@
   <script>
   function showError(msg) {
     var el = document.getElementById('err');
-    el.innerHTML = '⚠️ ' + msg + '<br><br>'
-      + '<small>Vérifiez votre connexion internet et rechargez la page (F5)</small>';
+    el.innerHTML = '⚠️ ' + msg + '<br><br><small>Vérifiez votre connexion internet et rechargez la page (F5)</small>';
     el.style.display = 'block';
   }
-
   if (typeof THREE === 'undefined') {
     showError('Three.js non chargé — connexion internet requise.');
   } else {
@@ -55,7 +70,6 @@
   }
 
   function init() {
-
   var CFG = {
     planeFollowSpeed : 0.08,
     planeBoostSpeed  : 0.22,
@@ -75,24 +89,20 @@
     fogColor         : 0xcc5522,
     fogDensity       : 0.009
   };
-
-  var scene    = new THREE.Scene();
-  scene.fog    = new THREE.FogExp2(CFG.fogColor, CFG.fogDensity);
-
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(CFG.fogColor, CFG.fogDensity);
   var renderer = new THREE.WebGLRenderer({ antialias: true, precision: 'highp' });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
-  renderer.shadowMap.enabled    = true;
-  renderer.shadowMap.type       = THREE.PCFSoftShadowMap;
-  renderer.toneMapping          = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure  = 1.25;
-  renderer.outputEncoding       = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
+  renderer.outputEncoding = THREE.sRGBEncoding;
   document.body.appendChild(renderer.domElement);
-
   var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 600);
   camera.position.set(0, 4.5, 12);
   camera.lookAt(new THREE.Vector3(0, -0.5, -8));
-
   var sunLight = new THREE.DirectionalLight(0xffd27a, 4.0);
   sunLight.position.set(-30, 6, -60);
   sunLight.castShadow = true;
@@ -102,327 +112,140 @@
   var fillLight = new THREE.DirectionalLight(0x661199, 0.80);
   fillLight.position.set(25, 15, 10);
   scene.add(fillLight);
-
   var skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
-    uniforms: {
-      uTop:     { value: new THREE.Color(CFG.skyTop) },
-      uMid:     { value: new THREE.Color(CFG.skyMid) },
-      uHorizon: { value: new THREE.Color(CFG.skyHorizon) }
-    },
-    vertexShader: [
-      'varying float vY;',
-      'void main(){',
-      '  vY = normalize(position).y;',
-      '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);',
-      '}'
-    ].join('\n'),
-    fragmentShader: [
-      'varying float vY;',
-      'uniform vec3 uTop; uniform vec3 uMid; uniform vec3 uHorizon;',
-      'void main(){',
-      '  vec3 col;',
-      '  if(vY > 0.08){',
-      '    float t = smoothstep(0.08,0.65,vY);',
-      '    col = mix(uMid,uTop,t);',
-      '  } else {',
-      '    float t = smoothstep(-0.18,0.08,vY);',
-      '    col = mix(uHorizon,uMid,t);',
-      '  }',
-      '  gl_FragColor = vec4(col,1.0);',
-      '}'
-    ].join('\n')
+    uniforms: { uTop:{value:new THREE.Color(CFG.skyTop)}, uMid:{value:new THREE.Color(CFG.skyMid)}, uHorizon:{value:new THREE.Color(CFG.skyHorizon)} },
+    vertexShader: ['varying float vY;','void main(){','  vY=normalize(position).y;','  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);','}'].join('\n'),
+    fragmentShader: ['varying float vY;','uniform vec3 uTop;uniform vec3 uMid;uniform vec3 uHorizon;','void main(){','  vec3 col;','  if(vY>0.08){float t=smoothstep(0.08,0.65,vY);col=mix(uMid,uTop,t);}','  else{float t=smoothstep(-0.18,0.08,vY);col=mix(uHorizon,uMid,t);}','  gl_FragColor=vec4(col,1.0);','}'].join('\n')
   });
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(450, 64, 40), skyMat));
-
-  var sunMesh = new THREE.Mesh(
-    new THREE.CircleGeometry(7, 32),
-    new THREE.MeshBasicMaterial({ color: 0xffe866, transparent: true, opacity: 0.92 })
-  );
-  sunMesh.position.set(-85, -14, -380);
-  scene.add(sunMesh);
-
-  var haloMesh = new THREE.Mesh(
-    new THREE.CircleGeometry(18, 32),
-    new THREE.MeshBasicMaterial({ color: 0xff7722, transparent: true, opacity: 0.22 })
-  );
-  haloMesh.position.set(-85, -14, -381);
-  scene.add(haloMesh);
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(450,64,40), skyMat));
+  var sunMesh = new THREE.Mesh(new THREE.CircleGeometry(7,32), new THREE.MeshBasicMaterial({color:0xffe866,transparent:true,opacity:0.92}));
+  sunMesh.position.set(-85,-14,-380); scene.add(sunMesh);
+  var haloMesh = new THREE.Mesh(new THREE.CircleGeometry(18,32), new THREE.MeshBasicMaterial({color:0xff7722,transparent:true,opacity:0.22}));
+  haloMesh.position.set(-85,-14,-381); scene.add(haloMesh);
 
   function createAirplane() {
     var root = new THREE.Group();
-    var white    = new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: 0.18, metalness: 0.52 });
-    var grey     = new THREE.MeshStandardMaterial({ color: 0x7a8a9a, roughness: 0.30, metalness: 0.72 });
-    var titanium = new THREE.MeshStandardMaterial({ color: 0xaabbcc, roughness: 0.18, metalness: 0.88 });
-    var dark     = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.60, metalness: 0.40 });
-    var glass    = new THREE.MeshStandardMaterial({ color: 0x88ccff, roughness: 0.02, metalness: 0.05, transparent: true, opacity: 0.72 });
-    var rubber   = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.95, metalness: 0.02 });
-
-    function add(geo, mat, px, py, pz, rx, ry, rz) {
-      var m = new THREE.Mesh(geo, mat);
-      m.position.set(px||0, py||0, pz||0);
-      m.rotation.set(rx||0, ry||0, rz||0);
-      m.castShadow = true;
-      root.add(m);
-      return m;
+    var white    = new THREE.MeshStandardMaterial({color:0xf4f4f4,roughness:0.18,metalness:0.52});
+    var grey     = new THREE.MeshStandardMaterial({color:0x7a8a9a,roughness:0.30,metalness:0.72});
+    var titanium = new THREE.MeshStandardMaterial({color:0xaabbcc,roughness:0.18,metalness:0.88});
+    var dark     = new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:0.60,metalness:0.40});
+    var glass    = new THREE.MeshStandardMaterial({color:0x88ccff,roughness:0.02,metalness:0.05,transparent:true,opacity:0.72});
+    var rubber   = new THREE.MeshStandardMaterial({color:0x222222,roughness:0.95,metalness:0.02});
+    function add(geo,mat,px,py,pz,rx,ry,rz){var m=new THREE.Mesh(geo,mat);m.position.set(px||0,py||0,pz||0);m.rotation.set(rx||0,ry||0,rz||0);m.castShadow=true;root.add(m);return m;}
+    add(new THREE.CylinderGeometry(0.30,0.30,5.2,64),white,0,0,0,Math.PI/2);
+    add(new THREE.ConeGeometry(0.30,1.5,64),white,0,0,-3.35,-Math.PI/2);
+    add(new THREE.ConeGeometry(0.21,1.0,64),white,0,0,3.1,Math.PI/2);
+    function makeWing(side){
+      var geo=new THREE.BufferGeometry(); var x=side;
+      var verts=new Float32Array([x*0.02,0.030,0.00,x*0.02,0.030,0.88,x*0.02,-0.030,0.88,x*0.02,-0.030,0.00,x*3.15,0.012,0.22,x*3.15,0.012,0.67,x*3.15,-0.012,0.67,x*3.15,-0.012,0.22]);
+      var f=(side>0)?[0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,3,6,2,3,7,6,0,4,7,0,7,3,1,2,6,1,6,5]:[0,1,2,0,2,3,4,6,5,4,7,6,0,5,1,0,4,5,3,2,6,3,6,7,0,3,7,0,7,4,1,6,2,1,5,6];
+      geo.setIndex(f); geo.setAttribute('position',new THREE.BufferAttribute(verts,3)); geo.computeVertexNormals();
+      var m=new THREE.Mesh(geo,white); m.castShadow=true; return m;
     }
-
-    add(new THREE.CylinderGeometry(0.30,0.30,5.2,64), white, 0,0,0, Math.PI/2);
-    add(new THREE.ConeGeometry(0.30,1.5,64), white, 0,0,-3.35, -Math.PI/2);
-    add(new THREE.ConeGeometry(0.21,1.0,64), white, 0,0,3.1, Math.PI/2);
-
-    function makeWing(side) {
-      var geo = new THREE.BufferGeometry();
-      var x = side;
-      var verts = new Float32Array([
-        x*0.02,  0.030,  0.00,
-        x*0.02,  0.030,  0.88,
-        x*0.02, -0.030,  0.88,
-        x*0.02, -0.030,  0.00,
-        x*3.15,  0.012,  0.22,
-        x*3.15,  0.012,  0.67,
-        x*3.15, -0.012,  0.67,
-        x*3.15, -0.012,  0.22,
-      ]);
-      var f = (side>0) ? [
-        0,2,1, 0,3,2,
-        4,5,6, 4,6,7,
-        0,1,5, 0,5,4,
-        3,6,2, 3,7,6,
-        0,4,7, 0,7,3,
-        1,2,6, 1,6,5,
-      ] : [
-        0,1,2, 0,2,3,
-        4,6,5, 4,7,6,
-        0,5,1, 0,4,5,
-        3,2,6, 3,6,7,
-        0,3,7, 0,7,4,
-        1,6,2, 1,5,6,
-      ];
-      geo.setIndex(f);
-      geo.setAttribute('position', new THREE.BufferAttribute(verts,3));
-      geo.computeVertexNormals();
-      var m = new THREE.Mesh(geo, white);
-      m.castShadow = true;
-      return m;
+    var wingR=makeWing(1); wingR.position.set(0,-0.18,0.10); root.add(wingR);
+    var wingL=makeWing(-1); wingL.position.set(0,-0.18,0.10); root.add(wingL);
+    add(new THREE.BoxGeometry(0.04,0.34,0.18),white,3.17,0.08,0.44,0,0,0.30);
+    add(new THREE.BoxGeometry(0.04,0.34,0.18),white,-3.17,0.08,0.44,0,0,-0.30);
+    function makeTailFin(){
+      var geo=new THREE.BufferGeometry();
+      var verts=new Float32Array([0.027,0.00,1.90,-0.027,0.00,1.90,0.027,0.00,2.72,-0.027,0.00,2.72,0.020,1.10,2.30,-0.020,1.10,2.30]);
+      geo.setIndex([0,2,3,0,3,1,1,3,2,1,2,0,0,1,5,0,5,4,2,4,5,2,3,5,0,4,2,1,3,5]);
+      geo.setAttribute('position',new THREE.BufferAttribute(verts,3)); geo.computeVertexNormals();
+      return new THREE.Mesh(geo,white);
     }
-
-    var wingR = makeWing(1);
-    wingR.position.set(0,-0.18,0.10);
-    root.add(wingR);
-    var wingL = makeWing(-1);
-    wingL.position.set(0,-0.18,0.10);
-    root.add(wingL);
-
-    add(new THREE.BoxGeometry(0.04,0.34,0.18), white,  3.17, 0.08,0.44, 0,0, 0.30);
-    add(new THREE.BoxGeometry(0.04,0.34,0.18), white, -3.17, 0.08,0.44, 0,0,-0.30);
-
-    function makeTailFin() {
-      var geo = new THREE.BufferGeometry();
-      var verts = new Float32Array([
-         0.027, 0.00, 1.90,
-        -0.027, 0.00, 1.90,
-         0.027, 0.00, 2.72,
-        -0.027, 0.00, 2.72,
-         0.020, 1.10, 2.30,
-        -0.020, 1.10, 2.30,
-      ]);
-      geo.setIndex([0,2,3, 0,3,1, 1,3,2, 1,2,0, 0,1,5, 0,5,4, 2,4,5, 2,3,5, 0,4,2, 1,3,5]);
-      geo.setAttribute('position', new THREE.BufferAttribute(verts,3));
-      geo.computeVertexNormals();
-      return new THREE.Mesh(geo, white);
+    var fin=makeTailFin(); fin.castShadow=true; root.add(fin);
+    add(new THREE.BoxGeometry(1.85,0.04,0.52),white,0,0.10,2.55);
+    function makeEngine(sx){
+      add(new THREE.CylinderGeometry(0.175,0.148,0.82,32),grey,sx,-0.32,0.28,Math.PI/2);
+      add(new THREE.TorusGeometry(0.130,0.044,12,32),titanium,sx,-0.32,-0.12,Math.PI/2);
+      add(new THREE.CircleGeometry(0.086,32),dark,sx,-0.32,-0.10,0,Math.PI/2);
+      add(new THREE.CylinderGeometry(0.118,0.095,0.18,32),dark,sx,-0.32,0.72,Math.PI/2);
+      add(new THREE.BoxGeometry(0.065,0.18,0.70),grey,sx,-0.23,0.12);
     }
-    var fin = makeTailFin();
-    fin.castShadow = true;
-    root.add(fin);
-
-    add(new THREE.BoxGeometry(1.85,0.04,0.52), white, 0,0.10,2.55);
-
-    function makeEngine(sx) {
-      add(new THREE.CylinderGeometry(0.175,0.148,0.82,32), grey, sx, -0.32, 0.28, Math.PI/2);
-      add(new THREE.TorusGeometry(0.130,0.044,12,32), titanium, sx, -0.32, -0.12, Math.PI/2);
-      add(new THREE.CircleGeometry(0.086,32), dark, sx, -0.32, -0.10, 0, Math.PI/2);
-      add(new THREE.CylinderGeometry(0.118,0.095,0.18,32), dark, sx, -0.32, 0.72, Math.PI/2);
-      add(new THREE.BoxGeometry(0.065,0.18,0.70), grey, sx, -0.23, 0.12);
+    makeEngine(1.35); makeEngine(-1.35);
+    var portGeo=new THREE.CircleGeometry(0.052,12);
+    for(var i=-3;i<=3;i++){
+      add(portGeo,glass,0.306,0.065,i*0.42,0,-Math.PI/2);
+      add(portGeo,glass,-0.306,0.065,i*0.42,0,Math.PI/2);
+      var rimGeo=new THREE.RingGeometry(0.048,0.065,12);
+      add(rimGeo,rubber,0.305,0.065,i*0.42,0,-Math.PI/2);
+      add(rimGeo,rubber,-0.305,0.065,i*0.42,0,Math.PI/2);
     }
-    makeEngine( 1.35);
-    makeEngine(-1.35);
-
-    var portGeo = new THREE.CircleGeometry(0.052,12);
-    for(var i=-3; i<=3; i++){
-      add(portGeo, glass,  0.306,0.065,i*0.42, 0,-Math.PI/2);
-      add(portGeo, glass, -0.306,0.065,i*0.42, 0, Math.PI/2);
-      var rimGeo = new THREE.RingGeometry(0.048,0.065,12);
-      add(rimGeo, rubber,  0.305,0.065,i*0.42, 0,-Math.PI/2);
-      add(rimGeo, rubber, -0.305,0.065,i*0.42, 0, Math.PI/2);
-    }
-
-    add(new THREE.BoxGeometry(0.15,0.09,0.04), glass,  0.10,0.19,-3.72);
-    add(new THREE.BoxGeometry(0.15,0.09,0.04), glass, -0.10,0.19,-3.72);
-    add(new THREE.CylinderGeometry(0.008,0.006,0.32,8), grey, 0,0.30,2.80, Math.PI/2);
-
-    root.rotation.x = 0.05;
-    return root;
+    add(new THREE.BoxGeometry(0.15,0.09,0.04),glass,0.10,0.19,-3.72);
+    add(new THREE.BoxGeometry(0.15,0.09,0.04),glass,-0.10,0.19,-3.72);
+    add(new THREE.CylinderGeometry(0.008,0.006,0.32,8),grey,0,0.30,2.80,Math.PI/2);
+    root.rotation.x=0.05; return root;
   }
+  var airplane=createAirplane(); scene.add(airplane);
+  var ENGINE_OFFSETS=[new THREE.Vector3(1.35,-0.32,0.68),new THREE.Vector3(-1.35,-0.32,0.68)];
 
-  var airplane = createAirplane();
-  scene.add(airplane);
-
-  var ENGINE_OFFSETS = [
-    new THREE.Vector3( 1.35,-0.32,0.68),
-    new THREE.Vector3(-1.35,-0.32,0.68)
-  ];
-
-  var cloudMat = new THREE.MeshStandardMaterial({
-    color:0xffeedd, transparent:true, opacity:0.52,
-    roughness:1, metalness:0, depthWrite:false
-  });
-
+  var cloudMat=new THREE.MeshStandardMaterial({color:0xffeedd,transparent:true,opacity:0.52,roughness:1,metalness:0,depthWrite:false});
   function createCloud(x,y,z,scale){
-    var g = new THREE.Group();
-    var puffs=[[0,0,0,1],[0.9,0.2,0.2,0.82],[-0.85,0.15,-0.15,0.76],
-               [0.35,0.45,-0.5,0.66],[-0.25,-0.1,0.55,0.68],
-               [1.15,-0.05,-0.35,0.6],[-1.05,0.25,0.25,0.56]];
-    for(var p=0;p<puffs.length;p++){
-      var m=new THREE.Mesh(new THREE.SphereGeometry(puffs[p][3]*0.88,16,12),cloudMat);
-      m.position.set(puffs[p][0],puffs[p][1],puffs[p][2]);
-      g.add(m);
-    }
-    g.position.set(x,y,z);
-    g.scale.setScalar(scale);
-    return g;
+    var g=new THREE.Group();
+    var puffs=[[0,0,0,1],[0.9,0.2,0.2,0.82],[-0.85,0.15,-0.15,0.76],[0.35,0.45,-0.5,0.66],[-0.25,-0.1,0.55,0.68],[1.15,-0.05,-0.35,0.6],[-1.05,0.25,0.25,0.56]];
+    for(var p=0;p<puffs.length;p++){var m=new THREE.Mesh(new THREE.SphereGeometry(puffs[p][3]*0.88,16,12),cloudMat);m.position.set(puffs[p][0],puffs[p][1],puffs[p][2]);g.add(m);}
+    g.position.set(x,y,z); g.scale.setScalar(scale); return g;
   }
-
   var cloudObjects=[];
   for(var ci=0;ci<CFG.cloudCount;ci++){
-    var c=createCloud(
-      (Math.random()-0.5)*46,
-      (Math.random()-0.5)*7-0.5,
-      -8-Math.random()*55,
-      0.9+Math.random()*1.9
-    );
-    c.userData.driftSpeed=0.014+Math.random()*0.018;
-    cloudObjects.push(c);
-    scene.add(c);
+    var c=createCloud((Math.random()-0.5)*46,(Math.random()-0.5)*7-0.5,-8-Math.random()*55,0.9+Math.random()*1.9);
+    c.userData.driftSpeed=0.014+Math.random()*0.018; cloudObjects.push(c); scene.add(c);
   }
 
-  var birdMat=new THREE.LineBasicMaterial({color:0x1a1a2e});
-  var birdObjects=[];
+  var birdMat=new THREE.LineBasicMaterial({color:0x1a1a2e}); var birdObjects=[];
   for(var oi=0;oi<CFG.birdCount;oi++){
-    var bPos=new Float32Array([-0.22,0,0, 0,0.07,0, 0.22,0,0]);
-    var bGeo=new THREE.BufferGeometry();
-    bGeo.setAttribute('position',new THREE.BufferAttribute(bPos,3));
-    var bGrp=new THREE.Group();
-    bGrp.add(new THREE.Line(bGeo,birdMat));
-    bGrp.position.set(
-      (Math.random()-0.5)*22,
-      (Math.random()-0.5)*4+0.5,
-      -10-Math.random()*22
-    );
-    bGrp.userData.vx    = -(0.028+Math.random()*0.032);
-    bGrp.userData.phase = Math.random()*Math.PI*2;
-    bGrp.userData.amp   = 0.055+Math.random()*0.040;
-    bGrp.scale.setScalar(0.7+Math.random()*0.55);
-    birdObjects.push(bGrp);
-    scene.add(bGrp);
+    var bPos=new Float32Array([-0.22,0,0,0,0.07,0,0.22,0,0]);
+    var bGeo=new THREE.BufferGeometry(); bGeo.setAttribute('position',new THREE.BufferAttribute(bPos,3));
+    var bGrp=new THREE.Group(); bGrp.add(new THREE.Line(bGeo,birdMat));
+    bGrp.position.set((Math.random()-0.5)*22,(Math.random()-0.5)*4+0.5,-10-Math.random()*22);
+    bGrp.userData.vx=-(0.028+Math.random()*0.032); bGrp.userData.phase=Math.random()*Math.PI*2; bGrp.userData.amp=0.055+Math.random()*0.040;
+    bGrp.scale.setScalar(0.7+Math.random()*0.55); birdObjects.push(bGrp); scene.add(bGrp);
   }
 
-  var particleGeo = new THREE.SphereGeometry(CFG.contrailSize,4,3);
-  var poolIdle=[], poolActive=[];
-  var isMouseDown=false;
-  var _wp=new THREE.Vector3();
-
-  function getParticle(){
-    var p;
-    if(poolIdle.length>0){
-      p=poolIdle.pop();
-    } else {
-      p=new THREE.Mesh(
-        particleGeo,
-        new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0})
-      );
-      scene.add(p);
-    }
-    p.visible=true; p.userData.age=0;
-    return p;
-  }
-
-  function recycleParticle(p){
-    p.visible=false; p.material.opacity=0; poolIdle.push(p);
-  }
-
+  var particleGeo=new THREE.SphereGeometry(CFG.contrailSize,4,3);
+  var poolIdle=[],poolActive=[],isMouseDown=false,_wp=new THREE.Vector3();
+  function getParticle(){var p;if(poolIdle.length>0){p=poolIdle.pop();}else{p=new THREE.Mesh(particleGeo,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0}));scene.add(p);}p.visible=true;p.userData.age=0;return p;}
+  function recycleParticle(p){p.visible=false;p.material.opacity=0;poolIdle.push(p);}
   function spawnContrail(){
-    var count = isMouseDown ? CFG.contrailSpawn * 3 : CFG.contrailSpawn;
-    for(var ei=0;ei<ENGINE_OFFSETS.length;ei++){
-      for(var si=0;si<count;si++){
-        var p=getParticle();
-        _wp.set(ENGINE_OFFSETS[ei].x, ENGINE_OFFSETS[ei].y, ENGINE_OFFSETS[ei].z + 0.8);
-        airplane.localToWorld(_wp);
-        _wp.x+=(Math.random()-0.5)*0.18;
-        _wp.y+=(Math.random()-0.5)*0.10;
-        p.position.copy(_wp);
-        p.scale.setScalar(1);
-        p.userData.vz = 0.025 + Math.random()*0.025;
-        p.userData.vx = (Math.random()-0.5)*0.008;
-        p.userData.vy = (Math.random()-0.5)*0.005;
-        poolActive.push(p);
-      }
-    }
+    var count=isMouseDown?CFG.contrailSpawn*3:CFG.contrailSpawn;
+    for(var ei=0;ei<ENGINE_OFFSETS.length;ei++){for(var si=0;si<count;si++){
+      var p=getParticle();
+      _wp.set(ENGINE_OFFSETS[ei].x,ENGINE_OFFSETS[ei].y,ENGINE_OFFSETS[ei].z+0.8);
+      airplane.localToWorld(_wp);
+      _wp.x+=(Math.random()-0.5)*0.18; _wp.y+=(Math.random()-0.5)*0.10;
+      p.position.copy(_wp); p.scale.setScalar(1);
+      p.userData.vz=0.025+Math.random()*0.025; p.userData.vx=(Math.random()-0.5)*0.008; p.userData.vy=(Math.random()-0.5)*0.005;
+      poolActive.push(p);
+    }}
   }
 
-  scene.add(camera);
-  var speedLines=[];
+  scene.add(camera); var speedLines=[];
   for(var sli=0;sli<55;sli++){
-    var angle=Math.random()*Math.PI*2;
-    var r0=0.5+Math.random()*1.8;
-    var r1=r0+1.2+Math.random()*3.5;
-    var slPts=new Float32Array([
-      Math.cos(angle)*r0, Math.sin(angle)*r0, -9,
-      Math.cos(angle)*r1, Math.sin(angle)*r1, -9
-    ]);
-    var slGeo=new THREE.BufferGeometry();
-    slGeo.setAttribute('position',new THREE.BufferAttribute(slPts,3));
+    var angle=Math.random()*Math.PI*2,r0=0.5+Math.random()*1.8,r1=r0+1.2+Math.random()*3.5;
+    var slPts=new Float32Array([Math.cos(angle)*r0,Math.sin(angle)*r0,-9,Math.cos(angle)*r1,Math.sin(angle)*r1,-9]);
+    var slGeo=new THREE.BufferGeometry(); slGeo.setAttribute('position',new THREE.BufferAttribute(slPts,3));
     var slMat=new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:0});
-    var slLine=new THREE.Line(slGeo,slMat);
-    camera.add(slLine);
-    speedLines.push({mat:slMat, phase:Math.random()*Math.PI*2});
+    camera.add(new THREE.Line(slGeo,slMat)); speedLines.push({mat:slMat,phase:Math.random()*Math.PI*2});
   }
 
-  var composer = null;
-  try {
-    if(THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass){
-      composer = new THREE.EffectComposer(renderer);
-      composer.addPass(new THREE.RenderPass(scene, camera));
-      composer.addPass(new THREE.UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        CFG.bloomStrength, CFG.bloomRadius, CFG.bloomThreshold
-      ));
-    }
-  } catch(e) {
-    composer = null;
-    console.warn('Bloom non disponible, rendu direct.', e);
-  }
+  var composer=null;
+  try{if(THREE.EffectComposer&&THREE.RenderPass&&THREE.UnrealBloomPass){composer=new THREE.EffectComposer(renderer);composer.addPass(new THREE.RenderPass(scene,camera));composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth,window.innerHeight),CFG.bloomStrength,CFG.bloomRadius,CFG.bloomThreshold));}}
+  catch(e){composer=null;}
 
-  var audioCtx=null, audioReady=false;
-  var engOsc1, engOsc2, engGain, windSource, windGain, boostOsc, boostGain;
-
+  var audioCtx=null,audioReady=false,engOsc1,engOsc2,engGain,windSource,windGain,boostOsc,boostGain;
   function startAudio(){
-    if(audioReady) return;
-    audioReady=true;
+    if(audioReady)return; audioReady=true;
     try{
-      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-      var master=audioCtx.createGain();
-      master.gain.value=0.55;
-      master.connect(audioCtx.destination);
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      var master=audioCtx.createGain(); master.gain.value=0.55; master.connect(audioCtx.destination);
       engOsc1=audioCtx.createOscillator(); engOsc1.type='sawtooth'; engOsc1.frequency.value=82;
       engOsc2=audioCtx.createOscillator(); engOsc2.type='sine'; engOsc2.frequency.value=164;
       engGain=audioCtx.createGain(); engGain.gain.value=0.22;
       var engFilter=audioCtx.createBiquadFilter(); engFilter.type='lowpass'; engFilter.frequency.value=380; engFilter.Q.value=1.8;
       engOsc1.connect(engGain); engOsc2.connect(engGain); engGain.connect(engFilter); engFilter.connect(master);
       engOsc1.start(); engOsc2.start();
-      var bufLen=audioCtx.sampleRate*3;
-      var buf=audioCtx.createBuffer(1,bufLen,audioCtx.sampleRate);
-      var d=buf.getChannelData(0);
+      var bufLen=audioCtx.sampleRate*3,buf=audioCtx.createBuffer(1,bufLen,audioCtx.sampleRate),d=buf.getChannelData(0);
       for(var i=0;i<bufLen;i++) d[i]=Math.random()*2-1;
       windSource=audioCtx.createBufferSource(); windSource.buffer=buf; windSource.loop=true;
       windGain=audioCtx.createGain(); windGain.gain.value=0;
@@ -432,104 +255,49 @@
       boostGain=audioCtx.createGain(); boostGain.gain.value=0;
       var boostFilter=audioCtx.createBiquadFilter(); boostFilter.type='highpass'; boostFilter.frequency.value=220;
       boostOsc.connect(boostFilter); boostFilter.connect(boostGain); boostGain.connect(master); boostOsc.start();
-    }catch(e){ console.warn('Audio non disponible',e); audioCtx=null; }
+    }catch(e){console.warn('Audio non disponible',e);audioCtx=null;}
   }
 
-  var mouse={x:0,y:0}, smooth={x:0,y:0};
-  window.addEventListener('mousemove',function(e){
-    mouse.x =  (e.clientX/window.innerWidth -0.5)*2;
-    mouse.y = -(e.clientY/window.innerHeight-0.5)*2;
-  });
-  window.addEventListener('mousedown', function(){ isMouseDown=true; startAudio(); });
-  window.addEventListener('mouseup',   function(){ isMouseDown=false; });
-  window.addEventListener('touchmove', function(e){
-    var t=e.touches[0];
-    mouse.x= (t.clientX/window.innerWidth -0.5)*2;
-    mouse.y=-(t.clientY/window.innerHeight-0.5)*2;
-  },{passive:true});
-  window.addEventListener('touchstart',function(){ isMouseDown=true;  },{passive:true});
-  window.addEventListener('touchend',  function(){ isMouseDown=false; },{passive:true});
-  window.addEventListener('resize',function(){
-    camera.aspect=window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    if(composer) composer.setSize(window.innerWidth,window.innerHeight);
-  });
-  setTimeout(function(){ var h=document.getElementById('hint'); if(h) h.style.opacity='0'; },5000);
+  var mouse={x:0,y:0},smooth={x:0,y:0};
+  window.addEventListener('mousemove',function(e){mouse.x=(e.clientX/window.innerWidth-0.5)*2;mouse.y=-(e.clientY/window.innerHeight-0.5)*2;});
+  window.addEventListener('mousedown',function(){isMouseDown=true;startAudio();});
+  window.addEventListener('mouseup',function(){isMouseDown=false;});
+  window.addEventListener('touchmove',function(e){var t=e.touches[0];mouse.x=(t.clientX/window.innerWidth-0.5)*2;mouse.y=-(t.clientY/window.innerHeight-0.5)*2;},{passive:true});
+  window.addEventListener('touchstart',function(){isMouseDown=true;},{passive:true});
+  window.addEventListener('touchend',function(){isMouseDown=false;},{passive:true});
+  window.addEventListener('resize',function(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);if(composer)composer.setSize(window.innerWidth,window.innerHeight);});
+  setTimeout(function(){var h=document.getElementById('hint');if(h)h.style.opacity='0';},5000);
 
-  var clock=new THREE.Clock();
-  var boostFactor=1.0;
-
+  var clock=new THREE.Clock(),boostFactor=1.0;
   function animate(){
     requestAnimationFrame(animate);
     var t=clock.getElapsedTime();
-    var targetBoost = isMouseDown ? 6.0 : 1.0;
-    var lerpRate = isMouseDown ? 0.10 : 0.04;
-    boostFactor += (targetBoost - boostFactor) * lerpRate;
-    var followSpeed = CFG.planeFollowSpeed + (CFG.planeBoostSpeed - CFG.planeFollowSpeed)*(boostFactor-1)/5.0;
+    var targetBoost=isMouseDown?6.0:1.0,lerpRate=isMouseDown?0.10:0.04;
+    boostFactor+=(targetBoost-boostFactor)*lerpRate;
+    var followSpeed=CFG.planeFollowSpeed+(CFG.planeBoostSpeed-CFG.planeFollowSpeed)*(boostFactor-1)/5.0;
     smooth.x+=(mouse.x*CFG.planeRangeX-smooth.x)*followSpeed;
     smooth.y+=(mouse.y*CFG.planeRangeY-smooth.y)*followSpeed;
-    var shake = (boostFactor-1)*0.018;
-    airplane.position.x=smooth.x + (Math.random()-0.5)*shake;
-    airplane.position.y=smooth.y + (Math.random()-0.5)*shake*0.6;
-    var velX=mouse.x*CFG.planeRangeX-smooth.x;
-    var velY=mouse.y*CFG.planeRangeY-smooth.y;
+    var shake=(boostFactor-1)*0.018;
+    airplane.position.x=smooth.x+(Math.random()-0.5)*shake;
+    airplane.position.y=smooth.y+(Math.random()-0.5)*shake*0.6;
+    var velX=mouse.x*CFG.planeRangeX-smooth.x,velY=mouse.y*CFG.planeRangeY-smooth.y;
     airplane.rotation.z=-velX*0.07;
-    airplane.rotation.x= 0.05 + velY*0.025 - (boostFactor-1)*0.05;
+    airplane.rotation.x=0.05+velY*0.025-(boostFactor-1)*0.05;
     airplane.updateMatrixWorld();
-    var targetFOV = isMouseDown ? 82 : 55;
-    camera.fov += (targetFOV - camera.fov) * 0.07;
-    camera.updateProjectionMatrix();
-    var slTarget = Math.max(0, (boostFactor-1)/5.0);
-    for(var sli=0;sli<speedLines.length;sli++){
-      var sl=speedLines[sli];
-      var flicker = 0.4 + 0.6*Math.abs(Math.sin(t*18+sl.phase));
-      sl.mat.opacity += (slTarget*flicker*0.85 - sl.mat.opacity) * 0.14;
-    }
-    var cloudMult = 1.0 + (boostFactor-1)*1.5;
-    for(var ci=0;ci<cloudObjects.length;ci++){
-      cloudObjects[ci].position.z+=cloudObjects[ci].userData.driftSpeed*cloudMult;
-      if(cloudObjects[ci].position.z>16) cloudObjects[ci].position.z=-62;
-    }
-    for(var oi=0;oi<birdObjects.length;oi++){
-      var bird=birdObjects[oi];
-      bird.position.x+=bird.userData.vx*boostFactor;
-      if(bird.position.x<-18) bird.position.x=18;
-      var flap=Math.sin(t*12*(0.5+boostFactor*0.5)+bird.userData.phase)*bird.userData.amp;
-      var pos=bird.children[0].geometry.attributes.position;
-      pos.setY(0,-flap); pos.setY(2,-flap); pos.needsUpdate=true;
-    }
-    if(isMouseDown) spawnContrail();
-    for(var pi=poolActive.length-1;pi>=0;pi--){
-      var p=poolActive[pi];
-      p.userData.age++;
-      p.position.z += p.userData.vz;
-      p.position.x += p.userData.vx;
-      p.position.y += p.userData.vy;
-      var life=p.userData.age/CFG.contrailMaxAge;
-      p.material.opacity=Math.max(0, 0.60*(1-life*life));
-      p.scale.setScalar(1+life*3.5);
-      if(p.userData.age>=CFG.contrailMaxAge){
-        poolActive.splice(pi,1);
-        recycleParticle(p);
-      }
-    }
-    if(audioCtx){
-      var now=audioCtx.currentTime;
-      var bf=boostFactor;
-      engOsc1.frequency.setTargetAtTime(82+bf*22, now, 0.12);
-      engOsc2.frequency.setTargetAtTime(164+bf*44, now, 0.12);
-      engGain.gain.setTargetAtTime(0.18+bf*0.04, now, 0.12);
-      windGain.gain.setTargetAtTime(Math.max(0,(bf-1)*0.07), now, 0.10);
-      boostGain.gain.setTargetAtTime(Math.max(0,(bf-2.5)*0.09), now, 0.10);
-      boostOsc.frequency.setTargetAtTime(320+bf*45, now, 0.12);
-    }
-    if(composer){ composer.render(); } else { renderer.render(scene,camera); }
+    var targetFOV=isMouseDown?82:55;
+    camera.fov+=(targetFOV-camera.fov)*0.07; camera.updateProjectionMatrix();
+    var slTarget=Math.max(0,(boostFactor-1)/5.0);
+    for(var sli=0;sli<speedLines.length;sli++){var sl=speedLines[sli];var flicker=0.4+0.6*Math.abs(Math.sin(t*18+sl.phase));sl.mat.opacity+=(slTarget*flicker*0.85-sl.mat.opacity)*0.14;}
+    var cloudMult=1.0+(boostFactor-1)*1.5;
+    for(var ci=0;ci<cloudObjects.length;ci++){cloudObjects[ci].position.z+=cloudObjects[ci].userData.driftSpeed*cloudMult;if(cloudObjects[ci].position.z>16)cloudObjects[ci].position.z=-62;}
+    for(var oi=0;oi<birdObjects.length;oi++){var bird=birdObjects[oi];bird.position.x+=bird.userData.vx*boostFactor;if(bird.position.x<-18)bird.position.x=18;var flap=Math.sin(t*12*(0.5+boostFactor*0.5)+bird.userData.phase)*bird.userData.amp;var pos=bird.children[0].geometry.attributes.position;pos.setY(0,-flap);pos.setY(2,-flap);pos.needsUpdate=true;}
+    if(isMouseDown)spawnContrail();
+    for(var pi=poolActive.length-1;pi>=0;pi--){var p=poolActive[pi];p.userData.age++;p.position.z+=p.userData.vz;p.position.x+=p.userData.vx;p.position.y+=p.userData.vy;var life=p.userData.age/CFG.contrailMaxAge;p.material.opacity=Math.max(0,0.60*(1-life*life));p.scale.setScalar(1+life*3.5);if(p.userData.age>=CFG.contrailMaxAge){poolActive.splice(pi,1);recycleParticle(p);}}
+    if(audioCtx){var now=audioCtx.currentTime,bf=boostFactor;engOsc1.frequency.setTargetAtTime(82+bf*22,now,0.12);engOsc2.frequency.setTargetAtTime(164+bf*44,now,0.12);engGain.gain.setTargetAtTime(0.18+bf*0.04,now,0.12);windGain.gain.setTargetAtTime(Math.max(0,(bf-1)*0.07),now,0.10);boostGain.gain.setTargetAtTime(Math.max(0,(bf-2.5)*0.09),now,0.10);boostOsc.frequency.setTargetAtTime(320+bf*45,now,0.12);}
+    if(composer){composer.render();}else{renderer.render(scene,camera);}
   }
-
   animate();
-
-  } // fin init()
+  }
   </script>
 </body>
 </html>
